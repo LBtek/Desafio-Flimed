@@ -4,18 +4,20 @@ import dotenv from 'dotenv'
 dotenv.config()
 const bcrypt = require('bcrypt')
 
+const saltRounds = process.env.BCRYPT_SALT_ROUNDS as string
+
 export const createUser = async (name: string, email: string, password: string) => {
   const hasUser = await User.findOne({ where: { email } })
   let passwordHash = null
 
   if (!hasUser) {
-    bcrypt.hash(password, process.env.BCRYPT_SALT_ROUNDS, function (err: Error | undefined, hash: string) {
+    return bcrypt.hash(password, parseInt(saltRounds)).then(async (hash: string) => {
       passwordHash = hash
+      if (passwordHash) {
+        const newUser = await User.create({ name, email, password: passwordHash })
+        return newUser
+      }
     })
-    if (passwordHash) {
-      const newUser = await User.create({ name, email, passwordHash })
-      return newUser
-    }
   } else {
     return false
   }
@@ -32,8 +34,20 @@ export const listAllUsers = async () => {
 }
 
 export const getUser = async (id: number) => {
-  const user = User.findByPk(id)
+  const user = await User.findByPk(id)
   return user ?? false
+}
+
+export const updateUser = async (id: number, email: string, password: string) => {
+  const user = await User.findByPk(id)
+  if (user) {
+    return bcrypt.hash(password, parseInt(saltRounds)).then(async (hash: string) => {
+      user.email = email
+      user.password = hash
+
+      return await user.save()
+    })
+  }
 }
 
 export const deleteUser = async (id: number) => {

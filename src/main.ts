@@ -19,8 +19,7 @@ app.use(passport.initialize())
 app.use(apiRoutes)
 
 app.use((req: Request, res: Response) => {
-  res.status(404)
-  res.json({ error: 'Endpoint não encontrado.' })
+  res.status(404).json({ error: 'Endpoint não encontrado.' })
 })
 
 const errorHandler: ErrorRequestHandler = (err, req, res, next) => {

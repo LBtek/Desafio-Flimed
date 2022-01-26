@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { createUser, listAllUsers, getUser, deleteUser } from '../services'
+import { createUser, listAllUsers, getUser, deleteUser, updateUser } from '../services'
 
 export const signIn = async (req: Request, res: Response) => {
   res.json({ status: true, user: req.user })
@@ -11,8 +11,7 @@ export const signUp = async (req: Request, res: Response) => {
 
     let newUser = await createUser(name, email, password)
     if (newUser) {
-      res.status(201)
-      res.json({
+      res.status(201).json({
         id: newUser.id,
         name: newUser.name,
         email: newUser.email
@@ -20,8 +19,9 @@ export const signUp = async (req: Request, res: Response) => {
     } else {
       res.json({ error: 'E-mail já existe.' })
     }
+  } else {
+    res.json({ error: 'Nome, e-mail e/ou senha não enviados.' })
   }
-  res.json({ error: 'E-mail e/ou senha não enviados.' })
 }
 
 export const list = async (req: Request, res: Response) => {
@@ -29,8 +29,7 @@ export const list = async (req: Request, res: Response) => {
   if (list.length > 0) {
     res.json(list)
   } else {
-    res.status(404)
-    res.json({ error: 'Nenhum registro encontrado.' })
+    res.status(404).json({ error: 'Nenhum registro encontrado.' })
   }
 }
 
@@ -41,8 +40,23 @@ export const show = async (req: Request, res: Response) => {
     if (user) {
       res.json(user)
     } else {
-      res.status(404)
-      res.json({ error: `Usuário de ${id} não encontrado.` })
+      res.status(404).json({ error: `Usuário de ID ${id} não encontrado.` })
+    }
+  }
+}
+
+export const update = async (req: Request, res: Response) => {
+  const id = parseInt(req.params.id)
+  if (!isNaN(id)) {
+    if (req.body.email && req.body.password) {
+      const user = await updateUser(id, req.body.email, req.body.password)
+      if (user) {
+        res.json(user)
+      } else {
+        res.status(404).json({ error: `Usuário de ID ${id} não encontrado.` })
+      }
+    } else {
+      res.json({ error: 'E-mail e/ou senha não enviados.' })
     }
   }
 }
@@ -54,8 +68,7 @@ export const remove = async (req: Request, res: Response) => {
     if (user) {
       res.json(user)
     } else {
-      res.status(404)
-      res.json({ error: `Usuário de ${id} não encontrado.` })
+      res.status(404).json({ error: `Usuário de ID ${id} não encontrado.` })
     }
   }
 }

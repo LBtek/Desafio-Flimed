@@ -12,12 +12,11 @@ passport.use(
         where: { email }
       })
       if (user) {
-        bcrypt.compare(password, user.password, function (err: Error | undefined, result: boolean) {
+        await bcrypt.compare(password, user.password).then(function (result: boolean) {
           if (result) return done(null, user)
         })
-      }
-    }
-    return done(notAuthorizedJson, false)
+      } else return done(notAuthorizedJson, false)
+    } else return done(notAuthorizedJson, false)
   })
 )
 

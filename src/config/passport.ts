@@ -1,4 +1,5 @@
 import passport from 'passport'
+import validator from 'validator'
 import { BasicStrategy } from 'passport-http'
 import { User } from '../models'
 const bcrypt = require('bcrypt')
@@ -7,7 +8,7 @@ export const notAuthorizedJson = { status: 401, message: 'Não autorizado' }
 
 passport.use(
   new BasicStrategy(async (email, password, done) => {
-    if (email && password) {
+    if (validator.isEmail(email) && password) {
       const user = await User.findOne({
         where: { email }
       })

@@ -1,3 +1,4 @@
+import validator from 'validator'
 import { Request, Response } from 'express'
 import { createUser, listAllUsers, getUser, deleteUser, updateUser } from '../services'
 
@@ -6,7 +7,7 @@ export const signIn = async (req: Request, res: Response) => {
 }
 
 export const signUp = async (req: Request, res: Response) => {
-  if (req.body.name && req.body.email && req.body.password) {
+  if (req.body.name && validator.isEmail(req.body.email) && req.body.password) {
     let { name, email, password } = req.body
 
     let newUser = await createUser(name, email, password)
@@ -48,7 +49,7 @@ export const show = async (req: Request, res: Response) => {
 export const update = async (req: Request, res: Response) => {
   const id = parseInt(req.params.id)
   if (!isNaN(id)) {
-    if (req.body.email && req.body.password) {
+    if (validator.isEmail(req.body.email) && req.body.password) {
       const user = await updateUser(id, req.body.email, req.body.password)
       if (user) {
         res.json(user)
